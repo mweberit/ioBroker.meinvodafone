@@ -1,0 +1,21 @@
+{
+	"i18n": true,
+	"type": "panel",
+	"items": {
+		"username": {
+			"type": "text",
+			"label": "Username",
+			"newLine": true
+		},
+		"password": {
+			"type": "text",
+			"label": "Password",
+			"newLine": true
+		},
+		"number": {
+			"type": "text",
+			"label": "Phonenumber",
+			"newLine": true
+		}
+	}
+}
