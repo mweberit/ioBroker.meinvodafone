@@ -10,6 +10,8 @@ const utils = require("@iobroker/adapter-core");
 
 // Load your modules here, e.g.:
 // const fs = require("fs");
+var adapter = utils.adapter('meinvodafone');
+const request = require('request');
 
 class Meinvodafone extends utils.Adapter {
 
@@ -45,12 +47,34 @@ class Meinvodafone extends utils.Adapter {
 		Here a simple template for a boolean variable named "testVariable"
 		Because every adapter instance uses its own unique namespace variable names can't collide with other adapters variables
 		*/
-		await this.setObjectNotExistsAsync("testVariable", {
+		await this.setObjectNotExistsAsync("used", {
 			type: "state",
 			common: {
-				name: "testVariable",
+			        name: "Actual used data",
+			        type: "number",
+			        role: "state",
+			        read: true,
+			        write: false,
+			},
+			native: {},
+		});
+		await this.setObjectNotExistsAsync("remaining", {
+			type: "state",
+			common: {
+			        name: "Actual remaining data",
+			        type: "number",
+			        role: "state",
+			        read: true,
+			        write: false,
+			},
+			native: {},
+		});
+		await this.setObjectNotExistsAsync("dataRequest", {
+			type: "state",
+			common: {
+				name: "Get data from MeinVodafone now",
 				type: "boolean",
-				role: "indicator",
+				role: "button",
 				read: true,
 				write: true,
 			},
@@ -58,7 +82,7 @@ class Meinvodafone extends utils.Adapter {
 		});
 
 		// In order to get state updates, you need to subscribe to them. The following line adds a subscription for our variable we have created above.
-		this.subscribeStates("testVariable");
+		this.subscribeStates("dataRequest");
 		// You can also add a subscription for multiple states. The following line watches all states starting with "lights."
 		// this.subscribeStates("lights.*");
 		// Or, if you really must, you can also watch all states. Don't do this if you don't need to. Otherwise this will cause a lot of unnecessary load on the system:
@@ -69,21 +93,21 @@ class Meinvodafone extends utils.Adapter {
 			you will notice that each setState will cause the stateChange event to fire (because of above subscribeStates cmd)
 		*/
 		// the variable testVariable is set to true as command (ack=false)
-		await this.setStateAsync("testVariable", true);
+		//await this.setStateAsync("testVariable", true);
 
 		// same thing, but the value is flagged "ack"
 		// ack should be always set to true if the value is received from or acknowledged from the target system
-		await this.setStateAsync("testVariable", { val: true, ack: true });
+		//await this.setStateAsync("testVariable", { val: true, ack: true });
 
 		// same thing, but the state is deleted after 30s (getState will return null afterwards)
-		await this.setStateAsync("testVariable", { val: true, ack: true, expire: 30 });
+		//await this.setStateAsync("testVariable", { val: true, ack: true, expire: 30 });
 
 		// examples for the checkPassword/checkGroup functions
-		let result = await this.checkPasswordAsync("admin", "iobroker");
-		this.log.info("check user admin pw iobroker: " + result);
+		//let result = await this.checkPasswordAsync("admin", "iobroker");
+		//this.log.info("check user admin pw iobroker: " + result);
 
-		result = await this.checkGroupAsync("admin", "admin");
-		this.log.info("check group user admin group admin: " + result);
+		//result = await this.checkGroupAsync("admin", "admin");
+		//this.log.info("check group user admin group admin: " + result);
 	}
 
 	/**
@@ -129,7 +153,69 @@ class Meinvodafone extends utils.Adapter {
 	onStateChange(id, state) {
 		if (state) {
 			// The state was changed
-			this.log.info(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
+			//this.log.info(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
+		
+			if (id.endsWith(".dataRequest") && state.val == true) {
+				this.log.info("dataRequest");
+
+				this.setStateAsync("dataRequest", { val: false, ack: true });
+				
+				request({
+				        url : "https://www.vodafone.de/mint/rest/session/start",
+				        method : "POST",
+				        headers : {
+				            "Content-Type" : "application/json",
+				            "Accept" : "application/json"
+				        },
+				        body: JSON.stringify({
+				            "clientType" : "Portal",
+				            "username" : this.config.username,
+				            "password" : this.config.password
+				        })
+				    },
+				    function (error, response, body) {
+				        //log('1. request');
+				        //log('error: ' + error);
+				        //log('response: ' + JSON.stringify(response));
+				        //log('body: ' + body);
+				
+				        var cookies = response.headers['set-cookie'];
+				        //log('cookies: ' + cookies);
+				
+				        var cookie = cookies.join(';');
+				        //log('cookie: ' + cookie);
+				
+				        request({
+				                url : "https://www.vodafone.de/api/enterprise-resources/core/bss/sub-nil/mobile/payment/service-usages/subscriptions/" + this.config.number + "/unbilled-usage",
+				                method : "GET",
+				                headers : {
+				                    "x-vf-api" : "1499082775305",
+				                    "Referer" : "https://www.vodafone.de/meinvodafone/services/",
+				                    "Accept" : "application/json",
+				                    "Cookie" : cookie
+				                }
+				            },
+				            function (error, response, body) {
+				                //log('2. request');
+				                //log('error: ' + error);
+				                //log('response: ' + JSON.stringify(response));
+				                //log('body: ' + body);
+				                //log(response.body);
+				                var json = JSON.parse(response.body);
+				                //log("JSON: " + json.serviceUsageVBO.usageAccounts[0].usageGroup[0].usage[0].remaining);
+				                var used = json.serviceUsageVBO.usageAccounts[0].usageGroup[0].usage[0].used;
+				                var remaining = json.serviceUsageVBO.usageAccounts[0].usageGroup[0].usage[0].remaining;
+				                //log("used: " + used);
+				                //log("remaining: " + remaining);
+						adapter.setStateAsync("used", { val: Number(used), ack: true });
+						adapter.setStateAsync("remaining", { val: Number(remaining), ack: true });
+				                //setState("0_userdata.0.DataUsed", Number(used));
+				                //setState("0_userdata.0.DataRemaining", Number(remaining));
+				            }
+				        );
+				    }
+				);
+			}
 		} else {
 			// The state was deleted
 			this.log.info(`state ${id} deleted`);
