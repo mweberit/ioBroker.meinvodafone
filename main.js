@@ -186,7 +186,7 @@ class Meinvodafone extends utils.Adapter {
 				        //log('cookie: ' + cookie);
 				
 				        request({
-				                url : "https://www.vodafone.de/api/enterprise-resources/core/bss/sub-nil/mobile/payment/service-usages/subscriptions/" + this.config.number + "/unbilled-usage",
+				                url : "https://www.vodafone.de/api/enterprise-resources/core/bss/sub-nil/mobile/payment/service-usages/subscriptions/" + adapter.config.number + "/unbilled-usage",
 				                method : "GET",
 				                headers : {
 				                    "x-vf-api" : "1499082775305",
