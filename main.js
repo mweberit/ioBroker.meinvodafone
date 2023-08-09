@@ -69,6 +69,39 @@ class Meinvodafone extends utils.Adapter {
 			},
 			native: {},
 		});
+		await this.setObjectNotExistsAsync("total", {
+			type: "state",
+			common: {
+			        name: "Total data",
+			        type: "number",
+			        role: "state",
+			        read: true,
+			        write: false,
+			},
+			native: {},
+		});
+		await this.setObjectNotExistsAsync("unitOfMeasure", {
+			type: "state",
+			common: {
+			        name: "Unit of measure",
+			        type: "text",
+			        role: "state",
+			        read: true,
+			        write: false,
+			},
+			native: {},
+		});
+		await this.setObjectNotExistsAsync("lastUpdateDate", {
+			type: "state",
+			common: {
+			        name: "Last update date",
+			        type: "text",
+			        role: "state",
+			        read: true,
+			        write: false,
+			},
+			native: {},
+		});
 		await this.setObjectNotExistsAsync("getData", {
 			type: "state",
 			common: {
@@ -196,21 +229,15 @@ class Meinvodafone extends utils.Adapter {
 				                }
 				            },
 				            function (error, response, body) {
-				                //log('2. request');
-				                //log('error: ' + error);
-				                //log('response: ' + JSON.stringify(response));
-				                //log('body: ' + body);
-				                //log(response.body);
 				                var json = JSON.parse(response.body);
-				                //log("JSON: " + json.serviceUsageVBO.usageAccounts[0].usageGroup[0].usage[0].remaining);
 				                var used = json.serviceUsageVBO.usageAccounts[0].usageGroup[0].usage[0].used;
 				                var remaining = json.serviceUsageVBO.usageAccounts[0].usageGroup[0].usage[0].remaining;
-				                //log("used: " + used);
-				                //log("remaining: " + remaining);
+				                var total = json.serviceUsageVBO.usageAccounts[0].usageGroup[0].usage[0].total;
 						adapter.setStateAsync("used", { val: Number(used), ack: true });
 						adapter.setStateAsync("remaining", { val: Number(remaining), ack: true });
-				                //setState("0_userdata.0.DataUsed", Number(used));
-				                //setState("0_userdata.0.DataRemaining", Number(remaining));
+						adapter.setStateAsync("total", { val: Number(total), ack: true });
+						adapter.setStateAsync("unitOfMeasure", { val: json.serviceUsageVBO.usageAccounts[0].usageGroup[0].usage[0].unitOfMeasure, ack: true });
+						adapter.setStateAsync("lastUpdateDate", { val: json.serviceUsageVBO.usageAccounts[0].usageGroup[0].usage[0].lastUpdateDate, ack: true });
 				            }
 				        );
 				    }
