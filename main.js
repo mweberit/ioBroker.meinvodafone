@@ -84,7 +84,7 @@ class Meinvodafone extends utils.Adapter {
 			type: "state",
 			common: {
 			        name: "Unit of measure",
-			        type: "text",
+			        type: "string",
 			        role: "state",
 			        read: true,
 			        write: false,
@@ -95,7 +95,7 @@ class Meinvodafone extends utils.Adapter {
 			type: "state",
 			common: {
 			        name: "Last update date",
-			        type: "text",
+			        type: "string",
 			        role: "state",
 			        read: true,
 			        write: false,
