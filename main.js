@@ -69,7 +69,7 @@ class Meinvodafone extends utils.Adapter {
 			},
 			native: {},
 		});
-		await this.setObjectNotExistsAsync("dataRequest", {
+		await this.setObjectNotExistsAsync("getData", {
 			type: "state",
 			common: {
 				name: "Get data from MeinVodafone now",
@@ -82,7 +82,7 @@ class Meinvodafone extends utils.Adapter {
 		});
 
 		// In order to get state updates, you need to subscribe to them. The following line adds a subscription for our variable we have created above.
-		this.subscribeStates("dataRequest");
+		this.subscribeStates("getData");
 		// You can also add a subscription for multiple states. The following line watches all states starting with "lights."
 		// this.subscribeStates("lights.*");
 		// Or, if you really must, you can also watch all states. Don't do this if you don't need to. Otherwise this will cause a lot of unnecessary load on the system:
@@ -155,10 +155,10 @@ class Meinvodafone extends utils.Adapter {
 			// The state was changed
 			//this.log.info(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
 		
-			if (id.endsWith(".dataRequest") && state.val == true) {
-				this.log.info("dataRequest");
+			if (id.endsWith(".getData") && state.val == true) {
+				this.log.info("getData");
 
-				this.setStateAsync("dataRequest", { val: false, ack: true });
+				this.setStateAsync("getData", { val: false, ack: true });
 				
 				request({
 				        url : "https://www.vodafone.de/mint/rest/session/start",
