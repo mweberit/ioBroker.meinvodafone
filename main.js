@@ -207,16 +207,16 @@ class Meinvodafone extends utils.Adapter {
 				        })
 				    },
 				    function (error, response, body) {
-				        //log('1. request');
-				        //log('error: ' + error);
-				        //log('response: ' + JSON.stringify(response));
-				        //log('body: ' + body);
+				        //adapter.log('1. request');
+				        adapter.log('1. error: ' + error);
+				        adapter.log('1. response: ' + JSON.stringify(response));
+				        adapter.log('1. body: ' + body);
 				
 				        var cookies = response.headers['set-cookie'];
 				        //log('cookies: ' + cookies);
 				
 				        var cookie = cookies.join(';');
-				        //log('cookie: ' + cookie);
+				        adapter.log('cookie: ' + cookie);
 				
 				        request({
 				                url : "https://www.vodafone.de/api/enterprise-resources/core/bss/sub-nil/mobile/payment/service-usages/subscriptions/" + adapter.config.number + "/unbilled-usage",
@@ -229,6 +229,8 @@ class Meinvodafone extends utils.Adapter {
 				                }
 				            },
 				            function (error, response, body) {
+					        adapter.log('2. error: ' + error);
+					        adapter.log('2. response: ' + JSON.stringify(response));
 				                var json = JSON.parse(response.body);
 				                var used = json.serviceUsageVBO.usageAccounts[0].usageGroup[0].usage[0].used;
 				                var remaining = json.serviceUsageVBO.usageAccounts[0].usageGroup[0].usage[0].remaining;
