@@ -210,12 +210,19 @@ class Meinvodafone extends utils.Adapter {
 				        adapter.log.info('1. error: ' + error);
 				        adapter.log.info('1. response: ' + JSON.stringify(response));
 				        adapter.log.info('1. body: ' + body);
+
+					var json = JSON.parse(response);
+					var statusCode = json.operationError;    
+					if (statusCode != 200) {
+					        adapter.log.error(json.body.operationError.message);
+						return;
+					}
 				
 				        var cookies = response.headers['set-cookie'];
-				        //log('cookies: ' + cookies);
+				        //adapter.log.info('cookies: ' + cookies);
 				
 				        var cookie = cookies.join(';');
-				        adapter.log('cookie: ' + cookie);
+				        //adapter.log.info('cookie: ' + cookie);
 				
 				        request({
 				                url : "https://www.vodafone.de/api/enterprise-resources/core/bss/sub-nil/mobile/payment/service-usages/subscriptions/" + adapter.config.number + "/unbilled-usage",
