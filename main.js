@@ -207,10 +207,9 @@ class Meinvodafone extends utils.Adapter {
 				        })
 				    },
 				    function (error, response, body) {
-				        //adapter.log('1. request');
-				        adapter.log('1. error: ' + error);
-				        adapter.log('1. response: ' + JSON.stringify(response));
-				        adapter.log('1. body: ' + body);
+				        adapter.log.info('1. error: ' + error);
+				        adapter.log.info('1. response: ' + JSON.stringify(response));
+				        adapter.log.info('1. body: ' + body);
 				
 				        var cookies = response.headers['set-cookie'];
 				        //log('cookies: ' + cookies);
@@ -229,8 +228,8 @@ class Meinvodafone extends utils.Adapter {
 				                }
 				            },
 				            function (error, response, body) {
-					        adapter.log('2. error: ' + error);
-					        adapter.log('2. response: ' + JSON.stringify(response));
+					        adapter.log.info('2. error: ' + error);
+					        adapter.log.info('2. response: ' + JSON.stringify(response));
 				                var json = JSON.parse(response.body);
 				                var used = json.serviceUsageVBO.usageAccounts[0].usageGroup[0].usage[0].used;
 				                var remaining = json.serviceUsageVBO.usageAccounts[0].usageGroup[0].usage[0].remaining;
